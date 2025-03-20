@@ -1,0 +1,1 @@
+//  Displays an individual place with an "Add to Plan" button.

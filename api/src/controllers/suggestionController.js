@@ -1,0 +1,1 @@
+// Handles user-submitted trip suggestions.

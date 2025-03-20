@@ -1,0 +1,1 @@
+// Protects private routes using JWT authentication.

@@ -1,0 +1,1 @@
+// HOC to protect routes from unauthenticated users.
