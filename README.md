@@ -1,6 +1,6 @@
-# 🗺️ Trip Planner App
+# 🗺️ PlanVoyage App
 
-The **Trip Planner App** is a full-stack web application that allows users to search for travel destinations, find nearby places of interest, and create personalized trip plans. Users can save their plans for future reference and explore trip suggestions from other travelers.
+The **PlanVoyage App** is a full-stack web application that allows users to search for travel destinations, find nearby places of interest, and create personalized trip plans. Users can save their plans for future reference and explore trip suggestions from other travelers.
 
 ---
 
