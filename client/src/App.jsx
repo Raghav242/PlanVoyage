@@ -12,7 +12,12 @@ import Navbar from './components/Navbar';
 export default function App() {
   return (
     <>
-      <Navbar />
+      <div className="container text-center mt-5">
+        <h1 className="text-primary">Hello, Vite + React!</h1>
+        <p className="lead">Bootstrap styling is working 🎉</p>
+        <button className="btn btn-success">Click Me</button>
+      </div>
+        <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search-results" element={<SearchResults />} />
