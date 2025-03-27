@@ -1,89 +1,103 @@
-import React, { useState } from 'react';
-import logo from '../assets/logo-login.jpg';  
-import backgroundImage from '../assets/background-login.jpeg';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthUser } from "../context/AuthContext";
+import logo from "../assets/logo-login.jpg";  
+import backgroundImage from "../assets/background-login.jpeg";  
 
 export default function Login() {
-  // State to manage username and password
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const { login } = useAuthUser();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  // Handle input change for username
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  // Handle input change for password
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
-
-  // Handle form submission (login button click)
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (username && password) {
-      alert(`Logged in as: ${username}`);
-    } else {
-      alert("Please fill in both fields.");
+
+    if (!username || !password) {
+      setError("Please fill in both fields.");
+      return;
+    }
+
+    try {
+      const response = await login(username, password);
+
+      if (response.ok) {
+        navigate("/");  // Navigate to home after successful login
+      } else {
+        const data = await response.json();
+        setError(data.message || "Invalid credentials");
+      }
+    } catch {
+      setError("Error logging in. Please try again.");
     }
   };
 
   return (
-    <div className="container-fluid d-flex" style={{ minHeight: '100vh' }}>
-      {/* Left Side Image Section */}
-      <div className="col-7" style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-      {/* Image will be shown here */}
-      </div>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        paddingTop: "80px", // Adds space above the login box
+      }}
+    >
+      <div className="card p-4 shadow-lg" style={{ width: "22rem", backgroundColor: "#f5f5dc" }}>
+        {/* Smaller Logo */}
+        <div className="text-center mb-3">
+          <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: "120px" }} /> {/* Reduced size */}
+        </div>
 
-      {/* Right Side Login Section */}
-      <div className="col-5 d-flex justify-content-center align-items-center" style={{ backgroundColor: '#f5f5dc', minHeight: '100vh' }}>
-        <div className="card p-4 shadow-lg" style={{ width: '20rem' }}>
-          {/* Company Logo */}
-          <div className="text-center mb-4">
-            <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: '200px' }} />
+        <h3 className="text-center mb-4">Login</h3>
+
+        {/* Error Message */}
+        {error && <div className="alert alert-danger text-center">{error}</div>}
+
+        {/* Login Form */}
+        <form onSubmit={handleLogin}>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
 
-          {/* Login Form */}
-          <h3 className="text-center mb-4">Login</h3>
-          <form onSubmit={handleLogin}>
-            {/* Username Field */}
-            <div className="mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter Username"
-                value={username}
-                onChange={handleUsernameChange}
-              />
-            </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-            {/* Password Field */}
-            <div className="mb-3">
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter Password"
-                value={password}
-                onChange={handlePasswordChange}
-              />
-            </div>
+          <button type="submit" className="btn" style={{ backgroundColor: "#219EBC", color: "white", width: "100%" }}>
+            Login
+          </button>
+        </form>
 
-            {/* Login Button */}
-            <button type="submit" className="btn" style={{ backgroundColor: '#219EBC', color: 'white', width: '100%' }}>
-              Login
-            </button>
-          </form>
-
-          {/*Create account*/}
-          <div className="text-center mt-3">
+        {/* Register Link */}
+        <div className="text-center mt-3">
           <p>
-            New user?{' '}
-            <Link to="/register" style={{ color: '#219EBC', textDecoration: 'none' }}>
+            New user?{" "}
+            <Link to="/register" style={{ color: "#219EBC", textDecoration: "none" }}>
               Create an account
             </Link>
           </p>
         </div>
-        </div>  
       </div>
     </div>
   );

@@ -1,70 +1,59 @@
-//  Displays places fetched from geoapify API.
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import PlaceCard from "../components/PlaceCard";
 
 export default function SearchResults() {
-  const places = [
-    {
-      name: "Swan Boats",
-      location: "Boston, Massachusetts",
-      type: "Boat rental and sightseeing tour",
-      openingHours: "Monday to Sunday, 10:00 AM - 5:00 PM",
-      price: "$4.00 USD per person",
-      contact: "+1-617-522-1966",
-      website: "https://www.swanboats.com",
-    },
-    {
-      name: "Harvard Museum of Natural History",
-      location: "Cambridge, Massachusetts",
-      type: "Museum",
-      openingHours: "Monday to Sunday, 9:00 AM - 5:00 PM",
-      price: "$12.00 USD per person",
-      contact: "+1-617-495-3045",
-      website: "https://hmnh.harvard.edu",
-    }
-  ];
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddToPlan = (place) => {
-    alert(`Added "${place.name}" to your plan!`);
-    // Add functionality here for actually adding the place to the user's plan
-  };
+  const queryParams = new URLSearchParams(location.search);
+  const city = queryParams.get("city");
+  const distance = queryParams.get("distance");
+  const category = queryParams.get("category");
+
+  useEffect(() => {
+    async function fetchPlaces() {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/places?city=${city}&distance=${distance}&category=${category}&limit=10`
+        );
+        setPlaces(response.data);
+      } catch (error) {
+        console.error("Error fetching places:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPlaces();
+  }, [city, distance, category]);
 
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">Search Results</h1>
+      <button className="btn btn-secondary mb-3" onClick={() => navigate("/plan-trips")}>
+        Back to Search
+      </button>
       
-      {places.map((place, index) => (
-        <div key={index} className="card mb-3">
-          <div className="card-body d-flex justify-content-between">
-            <div>
-              <h4 className="card-title">{place.name}</h4>
-              <p className="card-text">
-                <strong>Location:</strong> {place.location}
-              </p>
-              <p className="card-text">
-                <strong>Type:</strong> {place.type}
-              </p>
-              <p className="card-text">
-                <strong>Opening Hours:</strong> {place.openingHours}
-              </p>
-              <p className="card-text">
-                <strong>Price:</strong> {place.price}
-              </p>
-              <p className="card-text">
-                <strong>Contact:</strong> {place.contact}
-              </p>
-              <p className="card-text">
-                <strong>Website:</strong> <a href={place.website} target="_blank" rel="noopener noreferrer">{place.website}</a>
-              </p>
-            </div>
-            <button 
-              className="btn btn-primary align-self-start"
-              onClick={() => handleAddToPlan(place)}
-            >
-              Add to Plan
-            </button>
+      {/* Display Search Title */}
+      <h1 className="mb-4">Search Results for <span className="text-primary">{city || "your location"}</span></h1>
+
+      {loading ? (
+        // Centered Loading Animation
+        <div className="d-flex justify-content-center align-items-center" style={{ height: "50vh" }}>
+          <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
+            <span className="visually-hidden">Loading...</span>
           </div>
         </div>
-      ))}
+      ) : places.length === 0 ? (
+        <p>No places found for <strong>{city || "your location"}</strong>.</p>
+      ) : (
+        <>
+          <p className="text-muted">Showing top {places.length} results in <strong>{city || "your location"}</strong></p>
+          {places.map((place, index) => <PlaceCard key={index} place={place} />)}
+        </>
+      )}
     </div>
   );
 }

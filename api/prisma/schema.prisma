@@ -1,20 +1,15 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
+datasource db { 
   provider = "mysql" 
   url      = env("DATABASE_URL")
 }
 
 model User {
   id          Int     @id @default(autoincrement())
+  username    String  @unique // Added this for login authentication
   email       String  @unique
   password    String
   name        String?
@@ -39,7 +34,7 @@ model TripPlace {
   id        Int      @id @default(autoincrement())
   tripId    Int
   trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  placeId   String   @unique // Geoapify Place ID
+  placeId   String   // Removed @unique so same place can be added to multiple trips
   name      String
   address   String?
   latitude  Float
@@ -59,9 +54,12 @@ model TripSuggestion {
   id          Int      @id @default(autoincrement())
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title       String
-  description String?
-  geojson     Json?    // Store the GeoJSON data for the suggestion
+  destination String   // Name of the destination
+  places      Json?    // Array of place names as JSON
+  description String?  // User's description or notes about the suggestion
+  image       String?  @db.VarChar(1000) // URL of an image related to the suggestion
+  website     String?  // Website URL, if applicable
+  category    String?  // Category of the suggestion (e.g., "City," "National Park")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
