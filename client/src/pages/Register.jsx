@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/logo-login.jpg";  // Replace with your logo image path
-import backgroundImage from "../assets/background-login.jpeg";  // Replace with your background image path
+import logo from "../assets/logo-login.jpg";
+import backgroundImage from "../assets/sea_background.jpg";
 
 export default function Register() {
-  const [formData, setFormData] = useState({ username: "", email: "", password: "", confirmPassword: "" });
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
@@ -32,11 +37,14 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        }
+      );
 
       const data = await response.json();
 
@@ -46,8 +54,7 @@ export default function Register() {
       } else {
         setError(data.message || "Registration failed.");
       }
-    // eslint-disable-next-line no-unused-vars
-    } catch (error) {
+    } catch {
       setError("Error registering. Please try again.");
     }
   };
@@ -64,23 +71,41 @@ export default function Register() {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        overflow: "hidden",
+        backdropFilter: "blur(5px)",
         display: "flex",
         flexDirection: "column",
-        paddingTop: "80px", // Adds space above the register box
+        paddingTop: "80px",
       }}
     >
-      <div className="card p-4 shadow-lg" style={{ width: "22rem", backgroundColor: "#f5f5dc" }}>
-        {/* Smaller Logo */}
+      <div
+        className="p-4 shadow-lg"
+        style={{
+          width: "24rem",
+          background: "rgba(255, 255, 255, 0.5)", // Slightly transparent white
+          borderRadius: "20px",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.3)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          color: "black", // Black text for better readability
+        }}
+      >
+        {/* Centered Logo */}
         <div className="text-center mb-3">
-          <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: "120px" }} /> {/* Reduced size */}
+          <img
+            src={logo}
+            alt="Logo"
+            className="img-fluid"
+            style={{ maxWidth: "100px", borderRadius: "10px" }}
+          />
         </div>
 
         <h3 className="text-center mb-4">Create an Account</h3>
 
         {/* Error/Success Messages */}
         {error && <div className="alert alert-danger text-center">{error}</div>}
-        {success && <div className="alert alert-success text-center">{success}</div>}
+        {success && (
+          <div className="alert alert-success text-center">{success}</div>
+        )}
 
         {/* Register Form */}
         <form onSubmit={handleRegister}>
@@ -92,6 +117,13 @@ export default function Register() {
               placeholder="Enter Username"
               value={formData.username}
               onChange={handleChange}
+              style={{
+                background: "rgba(255, 255, 255, 0.8)", // More solid for readability
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                borderRadius: "10px",
+                color: "black",
+                padding: "10px",
+              }}
             />
           </div>
 
@@ -103,6 +135,13 @@ export default function Register() {
               placeholder="Enter Email"
               value={formData.email}
               onChange={handleChange}
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                borderRadius: "10px",
+                color: "black",
+                padding: "10px",
+              }}
             />
           </div>
 
@@ -114,6 +153,13 @@ export default function Register() {
               placeholder="Enter Password"
               value={formData.password}
               onChange={handleChange}
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                borderRadius: "10px",
+                color: "black",
+                padding: "10px",
+              }}
             />
           </div>
 
@@ -125,10 +171,29 @@ export default function Register() {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                borderRadius: "10px",
+                color: "black",
+                padding: "10px",
+              }}
             />
           </div>
 
-          <button type="submit" className="btn" style={{ backgroundColor: "#219EBC", color: "white", width: "100%" }}>
+          <button
+            type="submit"
+            className="btn"
+            style={{
+              backgroundColor: "#0077b6",
+              color: "white",
+              width: "100%",
+              borderRadius: "10px",
+              padding: "10px",
+              fontWeight: "bold",
+              transition: "0.3s",
+            }}
+          >
             Register
           </button>
         </form>
@@ -137,7 +202,14 @@ export default function Register() {
         <div className="text-center mt-3">
           <p>
             Already have an account?{" "}
-            <Link to="/login" style={{ color: "#219EBC", textDecoration: "none" }}>
+            <Link
+              to="/login"
+              style={{
+                color: "#0077b6",
+                textDecoration: "none",
+                fontWeight: "bold",
+              }}
+            >
               Login
             </Link>
           </p>
@@ -146,3 +218,4 @@ export default function Register() {
     </div>
   );
 }
+  

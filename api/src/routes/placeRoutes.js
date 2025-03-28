@@ -3,6 +3,7 @@ import { findNearbyPlaces } from '../controllers/placeController.js';
 
 const router = express.Router();
 
-router.get('/', findNearbyPlaces); // Endpoint: GET /api/places
+// Endpoint: GET /api/places
+router.get('/', findNearbyPlaces); 
 
 export default router;

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../context/AuthContext";
 import logo from "../assets/logo-login.jpg";  
-import backgroundImage from "../assets/background-login.jpeg";  
+import backgroundImage from "../assets/sea_background.jpg";  
 
 export default function Login() {
   const { login } = useAuthUser();
@@ -45,16 +45,27 @@ export default function Login() {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        overflow: "hidden",
+        backdropFilter: "blur(5px)",
         display: "flex",
         flexDirection: "column",
-        paddingTop: "80px", // Adds space above the login box
+        paddingTop: "80px",
       }}
     >
-      <div className="card p-4 shadow-lg" style={{ width: "22rem", backgroundColor: "#f5f5dc" }}>
-        {/* Smaller Logo */}
+      <div
+        className="p-4 shadow-lg"
+        style={{
+          width: "24rem",
+          background: "rgba(255, 255, 255, 0.5)", // Slightly transparent white background
+          borderRadius: "20px",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.3)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          color: "black", // Black text
+        }}
+      >
+        {/* Centered Logo */}
         <div className="text-center mb-3">
-          <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: "120px" }} /> {/* Reduced size */}
+          <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: "100px", borderRadius: "10px" }} />
         </div>
 
         <h3 className="text-center mb-4">Login</h3>
@@ -71,6 +82,13 @@ export default function Login() {
               placeholder="Enter Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              style={{
+                background: "rgba(255, 255, 255, 0.8)", // More solid for readability
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                borderRadius: "10px",
+                color: "black",
+                padding: "10px",
+              }}
             />
           </div>
 
@@ -81,10 +99,29 @@ export default function Login() {
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              style={{
+                background: "rgba(255, 255, 255, 0.8)",
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                borderRadius: "10px",
+                color: "black",
+                padding: "10px",
+              }}
             />
           </div>
 
-          <button type="submit" className="btn" style={{ backgroundColor: "#219EBC", color: "white", width: "100%" }}>
+          <button
+            type="submit"
+            className="btn"
+            style={{
+              backgroundColor: "#0077b6",
+              color: "white",
+              width: "100%",
+              borderRadius: "10px",
+              padding: "10px",
+              fontWeight: "bold",
+              transition: "0.3s",
+            }}
+          >
             Login
           </button>
         </form>
@@ -93,7 +130,7 @@ export default function Login() {
         <div className="text-center mt-3">
           <p>
             New user?{" "}
-            <Link to="/register" style={{ color: "#219EBC", textDecoration: "none" }}>
+            <Link to="/register" style={{ color: "#0077b6", textDecoration: "none", fontWeight: "bold" }}>
               Create an account
             </Link>
           </p>
