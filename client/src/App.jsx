@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound';
 import TripSuggestions from './pages/TripSuggestions';
 import AddSuggestion from './pages/AddSuggestion';
 import PlanTrips from './pages/planTrips';
+import Plans from './pages/Plans';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/add-suggestion" element={<AddSuggestion />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/plans" element={<Plans />} />
         <Route path="*" element={<NotFound/> }/>
       </Routes>
     </>

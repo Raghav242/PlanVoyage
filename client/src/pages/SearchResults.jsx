@@ -2,23 +2,30 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PlaceCard from "../components/PlaceCard";
+import { useAuthUser } from "../context/AuthContext";
 
 export default function SearchResults() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuthUser();            
+  const userId = user?.id;                   
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userTrips, setUserTrips] = useState([]);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
+  // Get query parameters from the URL
   const queryParams = new URLSearchParams(location.search);
   const city = queryParams.get("city");
   const distance = queryParams.get("distance");
   const category = queryParams.get("category");
 
+  // Fetch places
   useEffect(() => {
     async function fetchPlaces() {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/places?city=${city}&distance=${distance}&category=${category}&limit=20`
+          `${import.meta.env.VITE_API_URL}/api/places?city=${city}&distance=${distance}&category=${category}&limit=20`
         );
         setPlaces(response.data);
       } catch (error) {
@@ -30,27 +37,54 @@ export default function SearchResults() {
     fetchPlaces();
   }, [city, distance, category]);
 
+  // Fetch user's trips
+  useEffect(() => {
+    if (!userId) return;
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/api/plans/user/${userId}`, {
+        withCredentials: true,
+      })
+      .then((res) => setUserTrips(res.data))
+      .catch((err) => console.error("Error fetching trips:", err));
+  }, [userId]);
+
+  const handleTripSelect = (e) => {
+    const tripId = parseInt(e.target.value);
+    const trip = userTrips.find((t) => t.id === tripId);
+    setSelectedTrip(trip);
+  };
+
   return (
     <div
       className="min-vh-100 text-dark p-4"
       style={{
-        background: "linear-gradient(to bottom, #87CEEB, #B0E0E6, #98FB98, #D4F1C5)", // Sky blue to light green
+        background: "linear-gradient(to bottom, #87CEEB, #B0E0E6, #98FB98, #D4F1C5)",
         minHeight: "100vh",
         overflowY: "auto",
       }}
     >
       <div className="container mt-5">
-        {/* Back Button */}
         <button className="btn btn-outline-dark mb-3" onClick={() => navigate("/plan-trips")}>
           ← Back to Search
         </button>
 
-        {/* Title */}
         <h1 className="fw-bold text-center">
           Search Results for <span className="text-primary">{city || "your location"}</span>
         </h1>
 
-        {/* Loading State */}
+        {/* Trip dropdown */}
+        <div className="d-flex justify-content-center align-items-center my-4">
+          <label className="me-2 fw-semibold">Selected Plan:</label>
+          <select className="form-select w-auto" value={selectedTrip?.id || ""} onChange={handleTripSelect}>
+            <option value="" disabled>Select a plan</option>
+            {userTrips.map((trip) => (
+              <option key={trip.id} value={trip.id}>
+                {trip.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {loading ? (
           <div className="d-flex justify-content-center align-items-center" style={{ height: "50vh" }}>
             <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
@@ -67,9 +101,15 @@ export default function SearchResults() {
               Showing top <strong>{places.length}</strong> results in <strong>{city || "your location"}</strong>
             </p>
 
-            {/* Displaying results in the same layout as before */}
+            {/* Pass userId to PlaceCard */}
             {places.map((place, index) => (
-              <PlaceCard key={index} place={place} />
+              <PlaceCard
+                key={index}
+                place={place}
+                selectedPlan={selectedTrip}
+                setSelectedPlan={setSelectedTrip}
+                userId={userId}
+              />
             ))}
           </>
         )}

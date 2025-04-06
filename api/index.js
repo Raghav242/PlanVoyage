@@ -7,6 +7,7 @@ import authRoutes from './src/routes/authRoutes.js';
 import suggestionRoutes from './src/routes/suggestionRoutes.js';
 import pingRoutes from './src/routes/pingRoutes.js';
 import placeRoutes from './src/routes/placeRoutes.js';
+import planRoutes from './src/routes/planRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,8 @@ app.use(pingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api',suggestionRoutes);
 app.use('/api/places', placeRoutes);
+
+app.use("/api/plans", planRoutes);
 
 
 app.listen(5000, () => console.log('Server running on port 5000'));
