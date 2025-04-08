@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthUser } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function SuggestedPlans() {
   const { user } = useAuthUser();
@@ -13,6 +14,8 @@ export default function SuggestedPlans() {
     website: '',
     category: '',
   });
+
+  const navigate = useNavigate();
 
   // Fetch existing trip suggestions when the page loads
   useEffect(() => {
@@ -64,6 +67,11 @@ export default function SuggestedPlans() {
     }
   };
 
+  // Handle View button click (Navigate to TripSuggestions page with selected suggestion)
+  const handleViewClick = (suggestion) => {
+    navigate(`/view-suggestion/${suggestion.id}`, { state: suggestion }); // Pass the entire suggestion data to ViewSuggestion page
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Suggested Plans</h1>
@@ -77,41 +85,46 @@ export default function SuggestedPlans() {
         </div>
       )}
 
-      {/* Table of Suggestions */}
-      <table className="table table-striped table-bordered">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Destination</th>
-            <th scope="col">Places</th>
-            <th scope="col">Description</th>
-            {/* <th scope="col">Image</th> */}
-            <th scope="col">Website</th>
-            <th scope="col">Category</th>
-            <th scope="col">Suggested By</th>
-          </tr>
-        </thead>
-        <tbody>
-          {suggestions.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="text-center">No trip suggestions available.</td>
-            </tr>
-          ) : (
-            suggestions.map((suggestion, index) => (
-              <tr key={suggestion.id}>
-                <th scope="row">{index + 1}</th>
-                <td>{suggestion.destination}</td>
-                <td>{suggestion.places ? JSON.parse(suggestion.places).join(', ') : 'N/A'}</td>
-                <td>{suggestion.description}</td>
-                {/* <td>{suggestion.image}</td> */}
-                <td>{suggestion.website}</td>
-                <td>{suggestion.category}</td>
-                <td>{suggestion.user?.username}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      {/* Display suggestions in boxes/cards */}
+      <div className="row row-cols-1 row-cols-md-3 g-4">
+        {suggestions.length === 0 ? (
+          <div className="col-12 text-center">
+            <p>No trip suggestions available.</p>
+          </div>
+        ) : (
+          suggestions.map((suggestion) => (
+            <div className="col" key={suggestion.id}>
+              <div className="card h-100" style={{ border: '1px solid #ddd', borderRadius: '8px' }}>
+                <img
+                  src={suggestion.image}
+                  alt="Suggestion"
+                  className="card-img-top"
+                  style={{ maxHeight: '200px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
+                />
+                <div className="card-body">
+                  <h5 className="card-title">{suggestion.destination}</h5>
+                  <p className="card-text">
+                    <strong>Places:</strong> {suggestion.places ? JSON.parse(suggestion.places).join(', ') : 'N/A'}
+                  </p>
+                  <p className="card-text">
+                    <strong>Category:</strong> {suggestion.category}
+                  </p>
+                </div>
+
+                <div className="card-footer text-center">
+                  {/* View Button */}
+                  <button
+                    className="btn btn-info"
+                    onClick={() => handleViewClick(suggestion)} // Pass the suggestion data
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* Modal for Adding a Suggestion */}
       {showModal && (
@@ -135,7 +148,7 @@ export default function SuggestedPlans() {
                   </div>
                   <div className="mb-3">
                     <label htmlFor="description" className="form-label">Description</label>
-                    <textarea id="description" name="description" className="form-control" placeholder="Enter Description" value={formData.description} onChange={handleChange} ></textarea>
+                    <textarea id="description" name="description" className="form-control" placeholder="Enter Description" value={formData.description} onChange={handleChange}></textarea>
                   </div>
                   <div className="mb-3">
                     <label htmlFor="image" className="form-label">Image URL</label>

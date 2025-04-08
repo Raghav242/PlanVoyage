@@ -1,64 +1,42 @@
 import React, { useState } from "react";
-import TripSelectorModal from "./TripSelectorModal";
-import axios from "axios";
 
-export default function PlaceCard({ place, userId, selectedPlan, setSelectedPlan }) {
-  const [showModal, setShowModal] = useState(false);
-  const [added, setAdded] = useState(false);
+export default function PlaceCard({ place, selectedTrip, onAdd, isAdded }) {
+  const [error, setError] = useState("");
 
-  const handleAdd = async () => {
-    if (!userId) {
-      alert("You must be logged in to add places to a plan.");
+  const handleAddClick = async () => {
+    if (!selectedTrip) {
+      setError("Please select a plan above before adding places.");
       return;
     }
 
-    if (selectedPlan) {
-      try {
-        await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/plans/${selectedPlan.id}/places`,
-          {
-            placeId: place.properties.place_id,
-            name: place.properties.name,
-            address: place.properties.formatted,
-            latitude: place.properties.lat,
-            longitude: place.properties.lon,
-            category: place.properties.categories?.[0] || "Uncategorized",
-            source: "Geoapify",
-            phone: place.properties.contact?.phone || "",
-            website: place.properties.website || place.properties.datasource?.url || "",
-            imageUrl: "",
-            notes: "",
-            order: 0,
-          },
-          { withCredentials: true }
-        );
-
-        setAdded(true);
-      } catch (err) {
-        console.error("Failed to add place to plan:", err);
-        alert("Failed to add to plan.");
-      }
-    } else {
-      setShowModal(true);
+    try {
+      await onAdd(place);
+      setError("");
+    } catch (err) {
+      console.error("Failed to add place:", err);
+      setError("Failed to add place. Please try again.");
     }
   };
 
   return (
-    <div className="card mb-3">
+    <div className="card mb-3 shadow-sm">
       <div className="card-body d-flex justify-content-between align-items-start">
+        {/* Place Info */}
         <div className="flex-grow-1 me-3">
           <h4 className="card-title">{place.properties.name}</h4>
-          <p><strong>Type:</strong> {place.properties.categories?.join(", ")}</p>
+          <p><strong>Type:</strong> {place.properties.categories.join(", ")}</p>
           <p><strong>Address:</strong> {place.properties.formatted}</p>
           <p>
             <strong>Contact:</strong>{" "}
             {place.properties.contact ? (
               <>
-                {place.properties.contact.phone && <span>Phone: {place.properties.contact.phone}</span>}
+                {place.properties.contact.phone && (
+                  <span>Phone: {place.properties.contact.phone}</span>
+                )}
                 <br />
-                {place.properties.contact.phone_other && <span>Other: {place.properties.contact.phone_other}</span>}
-                <br />
-                {place.properties.contact.email && <span>Email: {place.properties.contact.email}</span>}
+                {place.properties.contact.email && (
+                  <span>Email: {place.properties.contact.email}</span>
+                )}
               </>
             ) : (
               "N/A"
@@ -66,33 +44,29 @@ export default function PlaceCard({ place, userId, selectedPlan, setSelectedPlan
           </p>
         </div>
 
-        <div className="d-flex flex-column align-items-end justify-content-between" style={{ minWidth: "150px" }}>
+        {/* Action Button */}
+        <div className="d-flex flex-column align-items-end" style={{ minWidth: "150px" }}>
           <button
-            className="btn btn-primary"
-            onClick={handleAdd}
-            disabled={added}
+            className={`btn ${isAdded ? "btn-success" : "btn-primary"}`}
+            onClick={handleAddClick}
+            disabled={isAdded}
             style={{ whiteSpace: "nowrap", width: "100%" }}
           >
-            {added ? "Added" : "Add to Plan"}
+            {isAdded ? "Added!" : "Add to Plan"}
           </button>
 
-          {selectedPlan && (
+          {selectedTrip && (
             <span className="text-muted small mt-2 text-center w-100">
-              {added ? `✔ Added to ${selectedPlan.name}` : `Adding to: ${selectedPlan.name}`}
+              Adding to: <strong>{selectedTrip.name}</strong>
             </span>
           )}
         </div>
       </div>
 
-      {/* Modal fallback if no plan is selected */}
-      {showModal && (
-        <TripSelectorModal
-          place={place}
-          userId={userId}
-          onClose={() => setShowModal(false)}
-          selectedPlan={selectedPlan}
-          setSelectedPlan={setSelectedPlan}
-        />
+      {error && (
+        <div className="alert alert-warning p-2 m-2 mb-3 text-center">
+          {error}
+        </div>
       )}
     </div>
   );
