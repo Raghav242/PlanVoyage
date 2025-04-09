@@ -15,6 +15,7 @@ import ViewSuggestion from './pages/ViewSuggestions';
 import AddSuggestion from './pages/AddSuggestion';
 import PlanTrips from './pages/planTrips';
 import Plans from './pages/Plans';
+import ViewPlan from "./pages/ViewPlan";
 
 export default function App() {
   return (
@@ -26,7 +27,8 @@ export default function App() {
         <Route path="/search-results" element={<SearchResults />} />
         <Route path="/trip-planner" element={<TripPlanner />} />
         <Route path="/saved-plans" element={<SavedPlans />} />
-        <Route path="/suggested-plans" element={<SuggestedPlans />}/>
+        <Route path="/suggested-plans" element={<SuggestedPlans />}/> 
+        <Route path="/view-plan/:id" element={<ViewPlan />} />
         {/* <Route path="/suggestions" element={<TripSuggestions />} /> */}
         <Route path="/add-suggestion" element={<AddSuggestion />} />
         <Route path="/edit-suggestion/:suggestionId" element={<EditSuggestion />} /> 

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuthUser } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-export default function Plans() {
+export default function SavedPlans() {
   const { user } = useAuthUser();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,49 +21,36 @@ export default function Plans() {
       .finally(() => setLoading(false));
   }, [user]);
 
+  const handleView = (plan) => {
+    navigate(`/view-plan/${plan.id}`, { state: plan });
+  };
+
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">My Saved Plans</h1>
+      <h2 className="text-center mt-4 mb-5">My Saved Plans</h2>
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="text-center">Loading...</p>
       ) : plans.length === 0 ? (
-        <p>No saved plans yet.</p>
+        <p className="text-center">You don't have any saved plans yet.</p>
       ) : (
-        <div className="accordion" id="plansAccordion">
-          {plans.map((plan, i) => (
-            <div className="accordion-item" key={plan.id}>
-              <h2 className="accordion-header" id={`heading-${plan.id}`}>
-                <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#collapse-${plan.id}`}
-                  aria-expanded="false"
-                  aria-controls={`collapse-${plan.id}`}
-                >
-                  {plan.name}
-                </button>
-              </h2>
-              <div
-                id={`collapse-${plan.id}`}
-                className="accordion-collapse collapse"
-                aria-labelledby={`heading-${plan.id}`}
-                data-bs-parent="#plansAccordion"
-              >
-                <div className="accordion-body">
-                  {plan.places?.length > 0 ? (
-                    <ul>
-                      {plan.places.map((place) => (
-                        <li key={place.id}>
-                          <strong>{place.name}</strong>
-                          {place.address && <> – {place.address}</>}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No places added to this plan yet.</p>
-                  )}
+        <div className="row row-cols-1 row-cols-md-4 g-4">
+          {plans.map((plan) => (
+            <div className="col" key={plan.id}>
+              <div className="card shadow-sm h-100">
+                <div className="card-body d-flex flex-column justify-content-between">
+                  <div>
+                    <h4 className="card-title">{plan.name}</h4>
+                    {plan.description && (
+                      <p className="text-muted">{plan.description}</p>
+                    )}
+                    <p className="small text-muted">
+                      {plan.places?.length || 0} place{plan.places?.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <button className="btn btn-primary mt-3" onClick={() => handleView(plan)}>
+                    View
+                  </button>
                 </div>
               </div>
             </div>
