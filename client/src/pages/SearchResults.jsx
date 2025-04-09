@@ -55,6 +55,10 @@ export default function SearchResults() {
     setErrorMessage("");
   };
 
+  const handleView = (plan) => {
+    navigate(`/view-plan/${plan.id}`, { state: plan });
+  };
+
   const handleCreateNewPlan = async () => {
     const name = prompt("Enter a name for your new plan:");
     if (!name?.trim()) return;
@@ -135,9 +139,7 @@ export default function SearchResults() {
             value={selectedTrip?.id || ""}
             onChange={handleTripSelect}
           >
-            <option value="" disabled>
-              Select a plan
-            </option>
+            <option value="" disabled>Select a plan</option>
             {userTrips.map((trip) => (
               <option key={trip.id} value={trip.id}>
                 {trip.name}
@@ -147,6 +149,13 @@ export default function SearchResults() {
 
           <button className="btn btn-outline-primary" onClick={handleCreateNewPlan}>
             + Create Plan
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => selectedTrip && handleView(selectedTrip)}
+            disabled={!selectedTrip}
+          >
+            View Selected Plan
           </button>
         </div>
 
