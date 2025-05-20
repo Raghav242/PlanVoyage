@@ -70,7 +70,7 @@ export default function TripSelectorModal({ place, userId, onClose, selectedPlan
       const newTrip = res.data;
       setTrips([...trips, newTrip]);
       setLocalSelectedTrip(newTrip.id);
-      setSelectedPlan(newTrip); // Optional: set global selection to new trip
+      setSelectedPlan(newTrip); 
       setNewTripName("");
     } catch (err) {
       console.error("Error creating trip:", err);
@@ -93,7 +93,7 @@ export default function TripSelectorModal({ place, userId, onClose, selectedPlan
               onChange={(e) => {
                 const selected = trips.find((trip) => trip.id === parseInt(e.target.value));
                 setLocalSelectedTrip(e.target.value);
-                if (selected) setSelectedPlan(selected); // Update global selection
+                if (selected) setSelectedPlan(selected); 
               }}
             >
               <option value="">-- Select a Trip --</option>

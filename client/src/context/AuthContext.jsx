@@ -5,6 +5,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); 
   const navigate = useNavigate();
 
   // Function to fetch logged-in user
@@ -20,14 +21,15 @@ export function AuthProvider({ children }) {
       } else {
         setUser(null);
       }
-    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setUser(null);
+    } finally {
+      setLoading(false); 
     }
   };
 
   useEffect(() => {
-    fetchUser(); // Fetch user on mount
+    fetchUser(); 
   }, []);
 
   // Login function
@@ -48,24 +50,22 @@ export function AuthProvider({ children }) {
 
   // Logout function
   const logout = async () => {
-    // Perform logout request
-    await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, { method: "POST", credentials: "include" });
-    
-    // Clear the user state
-    setUser(null);
-  
-    // Redirect to the login page or any other page after logging out
+    await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
 
+    setUser(null);
     navigate("/login");
   };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useAuthUser() {
   return useContext(AuthContext);
 }

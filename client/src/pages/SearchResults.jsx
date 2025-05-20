@@ -26,7 +26,7 @@ export default function SearchResults() {
     async function fetchPlaces() {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/places?city=${city}&distance=${distance}&category=${category}&limit=20`
+          `${import.meta.env.VITE_API_URL}/api/places?city=${city}&distance=${distance}&category=${category}&limit=30`
         );
         setPlaces(response.data);
       } catch (error) {
@@ -79,16 +79,23 @@ export default function SearchResults() {
   };
 
   const handleAddPlace = async (place) => {
+    if (!user) {
+      setErrorMessage("Please login to add places to your plan.");
+      return;
+    }
+  
     if (!selectedTrip) {
       setErrorMessage("Please select a plan before adding places.");
       return;
     }
-
+  
+    setErrorMessage("");
+  
     const planId = selectedTrip.id;
     const placeId = place.properties.place_id;
-
+  
     if (addedPlacesMap[planId]?.has(placeId)) return;
-
+  
     try {
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/plans/${planId}/places`,
@@ -101,62 +108,95 @@ export default function SearchResults() {
           category: place.properties.categories?.[0] || "Other",
           notes: "",
           order: 0,
+          source: "Geoapify",
+          website: place.properties.website || null,
+          phone: place.properties.phone || null,
+          imageUrl: "", 
+          hours: place.properties.opening_hours || null,
+          city: place.properties.city || null,
+          state: place.properties.state || null,
+          country: place.properties.country || null,
         },
         { withCredentials: true }
       );
-
+      
+      
+  
+      // Update the addedPlacesMap
       setAddedPlacesMap((prev) => {
         const newSet = new Set(prev[planId] || []);
         newSet.add(placeId);
         return { ...prev, [planId]: newSet };
       });
+  
+      //Re-fetch the updated trip and update selectedTrip
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/plans/${planId}`,
+        { withCredentials: true }
+      );
+      setSelectedTrip(res.data); 
+  
     } catch (err) {
       console.error("Failed to add place to plan:", err);
     }
   };
+  
 
   return (
     <div
       className="min-vh-100 text-dark p-4"
       style={{
-        background: "linear-gradient(to bottom, #87CEEB, #B0E0E6, #98FB98, #D4F1C5)",
+        background: "linear-gradient(to bottom, #f8f9fa, #e9ecef, #dee2e6)",
         overflowY: "auto",
       }}
     >
       <div className="container mt-5">
-        <button className="btn btn-outline-dark mb-3" onClick={() => navigate("/plan-trips")}>
+        <button
+          className="btn btn-outline-dark mb-3"
+          onClick={() => navigate("/plan-trips")}
+        >
           ← Back to Search
         </button>
 
-        <h1 className="fw-bold text-center">
-          Search Results for <span className="text-primary">{city || "your location"}</span>
-        </h1>
+        {/* Title and Plan Selector Row */}
+        <div className="row justify-content-between align-items-center mb-4 flex-column flex-lg-row text-center text-lg-start">
+          <div className="col-lg-auto mb-3 mb-lg-0">
+            <h1 className="fw-bold mb-0">
+              Search Results for{" "}
+              <span className="text-primary">{city || "your location"}</span>
+            </h1>
+          </div>
 
-        <div className="d-flex justify-content-center align-items-center my-4 gap-3 flex-wrap">
-          <label className="fw-semibold">Selected Plan:</label>
-          <select
-            className="form-select w-auto"
-            value={selectedTrip?.id || ""}
-            onChange={handleTripSelect}
-          >
-            <option value="" disabled>Select a plan</option>
-            {userTrips.map((trip) => (
-              <option key={trip.id} value={trip.id}>
-                {trip.name}
-              </option>
-            ))}
-          </select>
+          {user && (
+            <div className="col-lg d-flex justify-content-center justify-content-lg-end align-items-center gap-3 flex-wrap">
+              <label className="fw-semibold mb-0">Selected Plan:</label>
+              <select
+                className="form-select w-auto"
+                value={selectedTrip?.id || ""}
+                onChange={handleTripSelect}
+              >
+                <option value="" disabled>
+                  Select a plan
+                </option>
+                {userTrips.map((trip) => (
+                  <option key={trip.id} value={trip.id}>
+                    {trip.name}
+                  </option>
+                ))}
+              </select>
 
-          <button className="btn btn-outline-primary" onClick={handleCreateNewPlan}>
-            + Create Plan
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => selectedTrip && handleView(selectedTrip)}
-            disabled={!selectedTrip}
-          >
-            View Selected Plan
-          </button>
+              <button className="btn btn-outline-primary" onClick={handleCreateNewPlan}>
+                + Create Plan
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => selectedTrip && handleView(selectedTrip)}
+                disabled={!selectedTrip}
+              >
+                View Plan
+              </button>
+            </div>
+          )}
         </div>
 
         {errorMessage && (
@@ -164,8 +204,15 @@ export default function SearchResults() {
         )}
 
         {loading ? (
-          <div className="d-flex justify-content-center align-items-center" style={{ height: "50vh" }}>
-            <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ height: "50vh" }}
+          >
+            <div
+              className="spinner-border text-primary"
+              role="status"
+              style={{ width: "3rem", height: "3rem" }}
+            >
               <span className="visually-hidden">Loading...</span>
             </div>
           </div>
@@ -176,21 +223,24 @@ export default function SearchResults() {
         ) : (
           <>
             <p className="text-muted text-center mb-4">
-              Showing top <strong>{places.length}</strong> results in <strong>{city || "your location"}</strong>
+              Showing top <strong>{places.length}</strong> results in{" "}
+              <strong>{city || "your location"}</strong>
             </p>
 
-            {places.map((place, index) => (
-              <PlaceCard
-                key={index}
-                place={place}
-                selectedTrip={selectedTrip}
-                onAdd={handleAddPlace}
-                isAdded={
-                  selectedTrip &&
-                  addedPlacesMap[selectedTrip.id]?.has(place.properties.place_id)
-                }
-              />
-            ))}
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+              {places.map((place, index) => (
+                <PlaceCard
+                  key={index}
+                  place={place}
+                  selectedTrip={selectedTrip}
+                  onAdd={handleAddPlace}
+                  isAdded={
+                    selectedTrip &&
+                    addedPlacesMap[selectedTrip.id]?.has(place.properties.place_id)
+                  } 
+                />
+              ))}
+            </div>
           </>
         )}
       </div>

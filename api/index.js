@@ -1,8 +1,8 @@
-//placeholder for routes, recheck and finalise on this
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+
 import authRoutes from './src/routes/authRoutes.js';
 import suggestionRoutes from './src/routes/suggestionRoutes.js';
 import pingRoutes from './src/routes/pingRoutes.js';
@@ -11,20 +11,41 @@ import planRoutes from './src/routes/planRoutes.js';
 import tripPlaceRoutes from './src/routes/tripPlaceRoutes.js';
 
 dotenv.config();
-const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Allowed frontend origins (for CORS)
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://planvoyage-phi.vercel.app', 
+];
+
+// CORS setup
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    console.warn(`❌ Blocked by CORS: ${origin}`);
+    return callback(new Error('CORS policy does not allow this origin.'));
+  },
+  credentials: true, 
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
+// API routes
 app.use(pingRoutes);
-
 app.use('/api/auth', authRoutes);
-app.use('/api',suggestionRoutes);
+app.use('/api', suggestionRoutes);
 app.use('/api/places', placeRoutes);
+app.use('/api/plans', planRoutes);
+app.use('/api/trip-places', tripPlaceRoutes);
 
-app.use("/api/plans", planRoutes);
-
-app.use("/api/trip-places", tripPlaceRoutes);
-
-app.listen(5000, () => console.log('Server running on port 5000'));
+// Server start
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

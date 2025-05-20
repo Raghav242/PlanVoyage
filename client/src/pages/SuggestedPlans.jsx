@@ -1,171 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import { useAuthUser } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import fallbackImage from "../assets/fallback.webp";
+import { useNavigate } from "react-router-dom";
 
 export default function SuggestedPlans() {
-  const { user } = useAuthUser();
-  const [showModal, setShowModal] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const [formData, setFormData] = useState({
-    destination: '',
-    places: '',
-    description: '',
-    image: '',
-    website: '',
-    category: '',
-  });
-
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch existing trip suggestions when the page loads
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/suggestions`)
       .then((res) => res.json())
       .then((data) => setSuggestions(data))
-      .catch((error) => console.error('Error fetching suggestions:', error));
+      .catch((error) => console.error("Error fetching suggestions:", error));
   }, []);
 
-  // Handle form field changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const getImage = (url) => {
+    return url && url.trim() !== "" ? url : fallbackImage;
   };
 
-  // Handle form submission (Adding a new suggestion)
-  const handleAddSuggestion = async (e) => {
-    e.preventDefault();
-    if (!formData.destination) {
-      alert('Destination is required!');
-      return;
+  const formatPlaces = (places) => {
+    if (!places) return [];
+    if (Array.isArray(places)) {
+      if (typeof places[0] === "object") {
+        return places.map(p => p.name); 
+      }
+      return places;
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/suggestions`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          destination: formData.destination,
-          places: formData.places ? JSON.stringify(formData.places.split(',').map(place => place.trim())) : null, // Convert places string to JSON array
-          description: formData.description,
-          image: formData.image,
-          website: formData.website,
-          category: formData.category,
-        }),
-      });
-
-      const newSuggestion = await res.json();
-      if (res.ok) {
-        setSuggestions([...suggestions, newSuggestion]); // Update UI instantly
-        setShowModal(false); // Close modal
-        setFormData({ destination: '', places: '', description: '', image: '', website: '', category: '' }); // Reset form
-      } else {
-        alert(newSuggestion.message || 'Failed to add suggestion.');
-      }
-    } catch (error) {
-      alert('Error adding suggestion. Try again.');
+      const parsed = JSON.parse(places);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return typeof places === "string" ? places.split(",") : [];
     }
   };
 
-  // Handle View button click (Navigate to TripSuggestions page with selected suggestion)
-  const handleViewClick = (suggestion) => {
-    navigate(`/view-suggestion/${suggestion.id}`, { state: suggestion }); // Pass the entire suggestion data to ViewSuggestion page
-  };
-
   return (
-    <div className="container mt-5">
-      <h1 className="text-center mb-4">Suggested Plans</h1>
+    <div
+      style={{
+        background: "linear-gradient(to bottom right, #f8f9fa, #e9ecef)",
+        minHeight: "100vh",
+        paddingTop: "80px",
+        paddingBottom: "40px",
+      }}
+    >
+      {selectedSuggestion ? (
+        <>
+          {/* Header Image */}
+          <div
+            className="position-relative w-100 bg-dark"
+            style={{
+              backgroundImage: `url(${getImage(selectedSuggestion.image)})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="d-block d-lg-none" style={{ aspectRatio: "16/9" }} />
+            <div className="d-none d-lg-block" style={{ height: "75vh" }} />
 
-      {/* Add Suggestion Button (Only visible if user is logged in) */}
-      {user && (
-        <div className="mb-4 text-center">
-          <button className="btn btn-success" onClick={() => setShowModal(true)}>
-            Add Suggestion
-          </button>
-        </div>
-      )}
+            <div className="position-absolute top-0 start-0 w-100 h-100" style={{ background: "rgba(0, 0, 0, 0.3)" }} />
 
-      {/* Display suggestions in boxes/cards */}
-      <div className="row row-cols-1 row-cols-md-3 g-4">
-        {suggestions.length === 0 ? (
-          <div className="col-12 text-center">
-            <p>No trip suggestions available.</p>
+            <button
+              className="btn btn-light position-absolute top-0 start-0 m-3"
+              onClick={() => setSelectedSuggestion(null)}
+              style={{ zIndex: 2 }}
+            >
+              ← Back
+            </button>
+
+            <div className="position-absolute bottom-0 start-0 text-white p-4" style={{ zIndex: 2 }}>
+              <h1 className="fw-bold display-5">{selectedSuggestion.destination}</h1>
+              <div className="d-flex flex-wrap gap-2 mt-2">
+                <span className="badge bg-secondary">Suggested Itinerary</span>
+                <span className="badge bg-dark">{selectedSuggestion.category || "Travel"}</span>
+              </div>
+            </div>
           </div>
-        ) : (
-          suggestions.map((suggestion) => (
-            <div className="col" key={suggestion.id}>
-              <div className="card h-100" style={{ border: '1px solid #ddd', borderRadius: '8px' }}>
-                <img
-                  src={suggestion.image}
-                  alt="Suggestion"
-                  className="card-img-top"
-                  style={{ maxHeight: '200px', objectFit: 'cover', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-                />
-                <div className="card-body">
-                  <h5 className="card-title">{suggestion.destination}</h5>
-                  <p className="card-text">
-                    <strong>Places:</strong> {suggestion.places ? JSON.parse(suggestion.places).join(', ') : 'N/A'}
-                  </p>
-                  <p className="card-text">
-                    <strong>Category:</strong> {suggestion.category}
-                  </p>
-                </div>
 
-                <div className="card-footer text-center">
-                  {/* View Button */}
-                  <button
-                    className="btn btn-info"
-                    onClick={() => handleViewClick(suggestion)} // Pass the suggestion data
+          {/* Details Section */}
+          <div className="container mt-4">
+            <div className="d-flex align-items-center mb-3">
+              <img
+                src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${selectedSuggestion.user?.username}`}
+                alt={selectedSuggestion.user?.username}
+                className="rounded-circle me-2"
+                style={{ width: "40px", height: "40px" }}
+              />
+              <div>
+                <div className="fw-semibold">{selectedSuggestion.user?.username}</div>
+                <div className="text-muted small">Shared itinerary</div>
+              </div>
+            </div>
+
+            <p className="lead">{selectedSuggestion.description || "No description available."}</p>
+
+            <div className="mt-4">
+              <h5>Places to Visit</h5>
+              <ul className="list-unstyled ps-3">
+                {formatPlaces(selectedSuggestion.places).map((place, idx) => (
+                  <li key={idx}>• {place}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-3">
+              <h6 className="mb-1">Website:</h6>
+              {selectedSuggestion.website ? (
+                <a
+                  href={selectedSuggestion.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary"
+                >
+                  {selectedSuggestion.website}
+                </a>
+              ) : (
+                <p className="text-muted">N/A</p>
+              )}
+            </div>
+
+            <div className="mt-2">
+              <h6 className="mb-1">Category:</h6>
+              <p>{selectedSuggestion.category || "N/A"}</p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="container">
+          <h2 className="text-center mb-4 fw-bold">Travel Itineraries for you</h2>
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            {suggestions.length === 0 ? (
+              <div className="col-12 text-center">
+                <p>No trip suggestions available.</p>
+              </div>
+            ) : (
+              suggestions.map((suggestion) => (
+                <div
+                  className="col"
+                  key={suggestion.id}
+                  onClick={() => setSelectedSuggestion(suggestion)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div
+                    className="card h-100 border-0 shadow-sm"
+                    style={{
+                      borderRadius: "10px",
+                      overflow: "hidden",
+                      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-5px)";
+                      e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.05)";
+                    }}
                   >
-                    View
-                  </button>
+                    <img
+                      src={getImage(suggestion.image)}
+                      alt={suggestion.destination}
+                      className="card-img-top"
+                      style={{ height: "180px", objectFit: "cover" }}
+                    />
+                    <div className="card-body">
+                      <h5 className="card-title fw-semibold text-truncate mb-2">
+                        {suggestion.destination}
+                      </h5>
+                      <p
+                        className="card-text text-muted"
+                        style={{ maxHeight: "60px", overflow: "hidden" }}
+                      >
+                        {suggestion.description?.slice(0, 100) || "No description available"}...
+                      </p>
+                    </div>
+                    <div className="card-footer d-flex align-items-center bg-transparent border-0 px-3 pb-3">
+                      <img
+                        src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${suggestion.user?.username}`}
+                        alt={suggestion.user?.username}
+                        className="rounded-circle me-2"
+                        style={{ width: "30px", height: "30px" }}
+                      />
+                      <span className="fw-medium small">{suggestion.user?.username}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Modal for Adding a Suggestion */}
-      {showModal && (
-        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }} aria-labelledby="exampleModalLabel" tabIndex="-1" aria-hidden="true">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">Add Suggestion</h5>
-                <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowModal(false)}></button>
-              </div>
-              <div className="modal-body">
-                {/* Form */}
-                <form onSubmit={handleAddSuggestion}>
-                  <div className="mb-3">
-                    <label htmlFor="destination" className="form-label">Destination</label>
-                    <input type="text" id="destination" name="destination" className="form-control" placeholder="Enter Destination" value={formData.destination} onChange={handleChange} required />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="places" className="form-label">Places to Visit (comma-separated)</label>
-                    <input type="text" id="places" name="places" className="form-control" placeholder="Enter Places (e.g., Park, Museum)" value={formData.places} onChange={handleChange} />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="description" className="form-label">Description</label>
-                    <textarea id="description" name="description" className="form-control" placeholder="Enter Description" value={formData.description} onChange={handleChange}></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="image" className="form-label">Image URL</label>
-                    <input type="text" id="image" name="image" className="form-control" placeholder="Enter Image URL" value={formData.image} onChange={handleChange} />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="website" className="form-label">Website URL</label>
-                    <input type="text" id="website" name="website" className="form-control" placeholder="Enter Website URL" value={formData.website} onChange={handleChange} />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="category" className="form-label">Category</label>
-                    <input type="text" id="category" name="category" className="form-control" placeholder="Enter Category" value={formData.category} onChange={handleChange} />
-                  </div>
-                  <button type="submit" className="btn btn-success w-100">Add Suggestion</button>
-                </form>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </div>
       )}

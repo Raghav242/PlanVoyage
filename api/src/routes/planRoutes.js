@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getPlansByUser,
+  getSinglePlan, 
   createPlan,
   addPlaceToPlan,
   deletePlan,
@@ -12,6 +13,9 @@ const router = express.Router();
 
 // GET /plans/user/:userId - Get all plans for a user (Protected)
 router.get("/user/:userId", authMiddleware, getPlansByUser);
+
+//  GET /plans/:id - Get a single plan by ID (Protected)
+router.get("/:id", authMiddleware, getSinglePlan);  // <-- ADD THIS
 
 // POST /plans - Create a new plan (Protected)
 router.post("/", authMiddleware, createPlan);

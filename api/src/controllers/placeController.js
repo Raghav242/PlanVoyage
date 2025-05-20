@@ -55,7 +55,7 @@ export const findNearbyPlaces = async (req, res) => {
 
     // 3. Fetch places within bounding box
     const placesResponse = await axios.get(
-      `https://api.geoapify.com/v2/places?categories=${category}&filter=rect%3A${lon1}%2C${lat1}%2C${lon2}%2C${lat2}&limit=${limit || 10}&apiKey=${apiKey}`
+      `https://api.geoapify.com/v2/places?categories=${category}&filter=rect%3A${lon1}%2C${lat1}%2C${lon2}%2C${lat2}&limit=${limit || 50}&apiKey=${apiKey}`
     );
 
     return res.json(placesResponse.data.features);

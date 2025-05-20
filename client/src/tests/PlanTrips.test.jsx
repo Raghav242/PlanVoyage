@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import PlanTrips from "../pages/planTrips";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import PlanTrips from "../pages/PlanTrips";
 
-// Mock the useNavigate hook
+//Mock useNavigate
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
@@ -17,10 +17,7 @@ describe("PlanTrips Component", () => {
   let localStorageMock;
 
   beforeEach(() => {
-    // Mock window.alert
     alertMock = vi.spyOn(window, "alert").mockImplementation(() => {});
-    
-    // Mock localStorage
     localStorageMock = {
       getItem: vi.fn().mockReturnValue(null),
       setItem: vi.fn(),
@@ -42,25 +39,17 @@ describe("PlanTrips Component", () => {
       </MemoryRouter>
     );
 
-    // Fill in the form
-    fireEvent.change(screen.getByPlaceholderText(/Where are you going/i), {
-      target: { value: "Boston" },
-    });
+    // Use getAllBy... and pick the first input for city
+    const destinationInput = screen.getAllByPlaceholderText(/Where are you going/i)[0];
+    const distanceInput = screen.getAllByPlaceholderText(/Distance/i)[0];
+    const selectInput = container.querySelector("select");
+    const submitBtn = screen.getAllByText(/Search/i)[0];
 
-    fireEvent.change(screen.getByPlaceholderText(/Distance/i), {
-      target: { value: "10" },
-    });
+    fireEvent.change(destinationInput, { target: { value: "Boston" } });
+    fireEvent.change(distanceInput, { target: { value: "10" } });
+    fireEvent.change(selectInput, { target: { value: "tourism.attraction" } });
+    fireEvent.click(submitBtn);
 
-    // Select category - using the select element directly
-    const selectElement = container.querySelector("select");
-    fireEvent.change(selectElement, {
-      target: { value: "tourism.attraction" },
-    });
-
-    // Submit the form
-    fireEvent.click(screen.getByText(/Search/i));
-
-    // Verify localStorage was updated correctly
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
       "tripSearch",
       JSON.stringify({
@@ -78,11 +67,9 @@ describe("PlanTrips Component", () => {
       </MemoryRouter>
     );
 
-    // Try to submit with empty form
-    const submitButton = screen.getByText(/Search/i);
-    fireEvent.click(submitButton);
+    const submitBtn = screen.getAllByText(/Search/i)[0];
+    fireEvent.click(submitBtn);
 
-    // Verify alert was called with correct message
     expect(alertMock).toHaveBeenCalledWith("Please fill all required fields!");
   });
 });

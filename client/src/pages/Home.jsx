@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import backgroundImage from "../assets/sea_background.jpg"; 
+import backgroundImage from "../assets/wallpaper.png"; 
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        color: "white", // Ensuring text is visible on the background
+        color: "white", 
       }}
     >
       <h1 className="mb-3 fw-bold">Welcome to PlanVoyage</h1>

@@ -19,7 +19,7 @@ export default function TripSuggestions() {
   if (!suggestion) return <p>Loading...</p>; // Display loading message while fetching data
 
   return (
-    <div className="container mt-4" style={{ paddingTop: "60px" }}> {/* Adjust padding to avoid navbar overlap */}
+    <div className="container mt-4" style={{ paddingTop: "60px" }}>
       <div className="destination-box" style={{
         padding: "20px", 
         backgroundColor: "#f8f9fa", 
@@ -50,9 +50,9 @@ export default function TripSuggestions() {
               className="img-fluid"
               style={{
                 maxWidth: "100%",
-                height: "auto", // Ensure the image retains its aspect ratio
-                borderRadius: "10px", // Optional: rounded corners for the image
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Optional: add a slight shadow for effect
+                height: "auto", 
+                borderRadius: "10px", 
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", 
               }}
             />
           </div>

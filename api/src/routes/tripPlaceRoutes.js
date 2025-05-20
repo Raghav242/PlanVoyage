@@ -1,4 +1,3 @@
-// routes/tripPlaceRoutes.js
 import express from "express";
 import {
   updateTripPlace,

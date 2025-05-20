@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo-login.jpg";
-import backgroundImage from "../assets/sea_background.jpg";
+import backgroundImage from "../assets/wallpaper.png";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -14,12 +14,10 @@ export default function Register() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  // Handle input change for all fields
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
@@ -50,7 +48,7 @@ export default function Register() {
 
       if (response.ok) {
         setSuccess("Registration successful! Redirecting to login...");
-        setTimeout(() => navigate("/login"), 2000); // Redirect after 2 seconds
+        setTimeout(() => navigate("/login"), 2000);
       } else {
         setError(data.message || "Registration failed.");
       }
@@ -63,159 +61,107 @@ export default function Register() {
     <div
       className="d-flex justify-content-center align-items-center"
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
+        minHeight: "100vh",
+        width: "100%",
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backdropFilter: "blur(5px)",
-        display: "flex",
-        flexDirection: "column",
-        paddingTop: "80px",
+        backdropFilter: "blur(6px)",
+        paddingTop: "70px",
+        paddingBottom: "30px",
       }}
     >
       <div
-        className="p-4 shadow-lg"
-        style={{
-          width: "24rem",
-          background: "rgba(255, 255, 255, 0.5)", // Slightly transparent white
-          borderRadius: "20px",
-          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.3)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          color: "black", // Black text for better readability
-        }}
+        className="container"
+        style={{ maxWidth: "450px", width: "100%" }}
       >
-        {/* Centered Logo */}
-        <div className="text-center mb-3">
-          <img
-            src={logo}
-            alt="Logo"
-            className="img-fluid"
-            style={{ maxWidth: "100px", borderRadius: "10px" }}
-          />
-        </div>
-
-        <h3 className="text-center mb-4">Create an Account</h3>
-
-        {/* Error/Success Messages */}
-        {error && <div className="alert alert-danger text-center">{error}</div>}
-        {success && (
-          <div className="alert alert-success text-center">{success}</div>
-        )}
-
-        {/* Register Form */}
-        <form onSubmit={handleRegister}>
-          <div className="mb-3">
-            <input
-              type="text"
-              name="username"
-              className="form-control"
-              placeholder="Enter Username"
-              value={formData.username}
-              onChange={handleChange}
+        <div
+          className="p-4 shadow"
+          style={{
+            background: "rgba(255, 255, 255, 0.5)",
+            borderRadius: "20px",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            color: "black",
+          }}
+        >
+          {/* Logo */}
+          <div className="text-center mb-3">
+            <img
+              src={logo}
+              alt="Logo"
+              className="img-fluid"
               style={{
-                background: "rgba(255, 255, 255, 0.8)", // More solid for readability
-                border: "1px solid rgba(0, 0, 0, 0.2)",
+                maxWidth: "100px",
                 borderRadius: "10px",
-                color: "black",
-                padding: "10px",
               }}
             />
           </div>
 
-          <div className="mb-3">
-            <input
-              type="email"
-              name="email"
-              className="form-control"
-              placeholder="Enter Email"
-              value={formData.email}
-              onChange={handleChange}
+          <h3 className="text-center mb-4">Create an Account</h3>
+
+          {error && <div className="alert alert-danger text-center">{error}</div>}
+          {success && <div className="alert alert-success text-center">{success}</div>}
+
+          <form onSubmit={handleRegister}>
+            {["username", "email", "password", "confirmPassword"].map((field, index) => (
+              <div className="mb-3" key={index}>
+                <input
+                  type={field.includes("password") ? "password" : field === "email" ? "email" : "text"}
+                  name={field}
+                  className="form-control"
+                  placeholder={
+                    field === "confirmPassword"
+                      ? "Confirm Password"
+                      : `Enter ${field.charAt(0).toUpperCase() + field.slice(1)}`
+                  }
+                  value={formData[field]}
+                  onChange={handleChange}
+                  style={{
+                    background: "rgba(255, 255, 255, 0.8)",
+                    border: "1px solid rgba(0, 0, 0, 0.2)",
+                    borderRadius: "10px",
+                    color: "black",
+                    padding: "10px",
+                  }}
+                />
+              </div>
+            ))}
+
+            <button
+              type="submit"
+              className="btn"
               style={{
-                background: "rgba(255, 255, 255, 0.8)",
-                border: "1px solid rgba(0, 0, 0, 0.2)",
+                backgroundColor: "#0077b6",
+                color: "white",
+                width: "100%",
                 borderRadius: "10px",
-                color: "black",
                 padding: "10px",
-              }}
-            />
-          </div>
-
-          <div className="mb-3">
-            <input
-              type="password"
-              name="password"
-              className="form-control"
-              placeholder="Enter Password"
-              value={formData.password}
-              onChange={handleChange}
-              style={{
-                background: "rgba(255, 255, 255, 0.8)",
-                border: "1px solid rgba(0, 0, 0, 0.2)",
-                borderRadius: "10px",
-                color: "black",
-                padding: "10px",
-              }}
-            />
-          </div>
-
-          <div className="mb-3">
-            <input
-              type="password"
-              name="confirmPassword"
-              className="form-control"
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              style={{
-                background: "rgba(255, 255, 255, 0.8)",
-                border: "1px solid rgba(0, 0, 0, 0.2)",
-                borderRadius: "10px",
-                color: "black",
-                padding: "10px",
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="btn"
-            style={{
-              backgroundColor: "#0077b6",
-              color: "white",
-              width: "100%",
-              borderRadius: "10px",
-              padding: "10px",
-              fontWeight: "bold",
-              transition: "0.3s",
-            }}
-          >
-            Register
-          </button>
-        </form>
-
-        {/* Login Redirect */}
-        <div className="text-center mt-3">
-          <p>
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              style={{
-                color: "#0077b6",
-                textDecoration: "none",
                 fontWeight: "bold",
+                transition: "0.3s",
               }}
             >
-              Login
-            </Link>
-          </p>
+              Register
+            </button>
+          </form>
+
+          <div className="text-center mt-3">
+            <p>
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                style={{
+                  color: "#0077b6",
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                }}
+              >
+                Login
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-  

@@ -2,64 +2,87 @@ generator client {
   provider = "prisma-client-js"
 }
 
-datasource db { 
-  provider = "mysql" 
+datasource db {
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  username    String  @unique // Added this for login authentication
-  email       String  @unique
+  id          Int               @id @default(autoincrement())
+  username    String            @unique
+  email       String            @unique
   password    String
   name        String?
   trips       Trip[]
   suggestions TripSuggestion[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model Trip {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
   description String?
   places      TripPlace[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model TripPlace {
-  id        Int      @id @default(autoincrement())
-  tripId    Int
-  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  placeId   String   // Removed @unique so same place can be added to multiple trips
-  name      String
-  address   String?
-  latitude  Float
-  longitude Float
-  category  String?  // Restaurant, museum, etc.
-  notes     String?  // User's personal notes
-  order     Int      // Order of the place in the trip
-  source    String   @default("Geoapify") // Could be "Geoapify" or "Manual"
-  website   String?  // Store website URLs if available
-  phone     String?  // Store contact info if available
-  imageUrl  String?  // Store image URLs if needed
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  tripId      Int
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  placeId     String
+  name        String
+  address     String?
+  latitude    Float
+  longitude   Float
+  category    String?
+  notes       String?
+  order       Int
+  source      String   @default("Geoapify")
+  website     String?
+  phone       String?
+  imageUrl    String?
+  hours       String?  // NEW
+  city        String?  // NEW
+  state       String?  // NEW
+  country     String?  // NEW
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model TripSuggestion {
   id          Int      @id @default(autoincrement())
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  destination String   // Name of the destination
-  places      Json?    // Array of place names as JSON
-  description String?  // User's description or notes about the suggestion
-  image       String?  @db.VarChar(1000) // URL of an image related to the suggestion
-  website     String?  // Website URL, if applicable
-  category    String?  // Category of the suggestion (e.g., "City," "National Park")
+  destination String
+  description String?  @db.VarChar(1000)
+  image       String?  @db.VarChar(1000)
+  website     String?
+  category    String?
+  places      SuggestionPlace[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model SuggestionPlace {
+  id           Int              @id @default(autoincrement())
+  suggestionId Int
+  suggestion   TripSuggestion   @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  name         String
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  category     String?
+  hours        String?          // NEW
+  city         String?          // NEW
+  state        String?          // NEW
+  country      String?          // NEW
+  order        Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 }

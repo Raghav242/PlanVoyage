@@ -8,8 +8,8 @@ The **PlanVoyage App** is a full-stack web application that allows users to sear
 
 ### ✅ Public Features (No Login Required)
 - 🌍 **Search Locations** – Users can search for a city (e.g., Boston) and get nearby places based on distance.
-- 📍 **View Places** – Fetches results from the **GeoNames API**.
-- 🔎 **Explore Suggested Plans** – View trip plans created by other users.
+- 📍 **View Places** – Fetches results from the **Geoapify**.
+- 🔎 **Explore Suggested Itinery** – View trip plans created by other users.
 
 ### 🔐 User Features (Login Required)
 - ➕ **Save Trip Plans** – Add places to a personalized list.
@@ -23,19 +23,19 @@ The **PlanVoyage App** is a full-stack web application that allows users to sear
 
 ### **Frontend (React)**
 - **Framework:** React.js (Vite)
-- **State Management:** Context API / Redux
+- **State Management:** Context API
 - **UI Library:** Bootstrap CSS
 - **API Calls:** Axios
 - **Routing:** React Router
-- **Testing:** React Testing Library & Lighthouse
+- **Testing:** Vitest
 
 ### **Backend (Node.js + Express)**
 - **Framework:** Express.js
 - **Database ORM:** Prisma
 - **Authentication:** JSON Web Token (JWT) + HTTP-only Cookies
 - **Database:** PostgreSQL
-- **External API Integration:** GeoNames API
-- **Deployment:** Vercel (Frontend), Render/Fly.io (Backend), Supabase (Database)
+- **External API Integration:** Geoapify
+- **Deployment:** Vercel (Frontend), Render (Backend), Render (Database)
 
 ---
 
@@ -45,7 +45,7 @@ The **PlanVoyage App** is a full-stack web application that allows users to sear
 trip-planner/
 │── client/               # Frontend (React)
 │── api/                  # Backend (Node.js + Express + Prisma)
-│── prisma/               # Database schema & migrations
+    │── prisma/           # Database schema & migrations
 │── .gitignore            # Ignore files for Git
 │── README.md             # Documentation
 │── package.json          # Project dependencies
@@ -59,8 +59,6 @@ client/
 │   ├── components/       # Reusable UI components (Navbar, Footer, SearchBar, PlaceCard)
 │   ├── pages/            # React Pages (Home, SearchResults, TripPlanner, SavedPlans, SuggestedPlans, Login)
 │   ├── context/          # Global state management (AuthContext, PlanContext)
-│   ├── api/              # API functions (auth.js, places.js, plans.js, suggestions.js)
-│   ├── styles/           # Tailwind CSS global styles
 │   ├── App.jsx           # Main React component
 │   ├── main.jsx          # Renders the app
 │── tests/                # Unit tests
@@ -77,33 +75,134 @@ api/
 │── tests/               # Unit tests
 │── package.json         # Dependencies
 │── .env                 # Environment variables
+```
+---
 
-# 🛠️ Installation & Setup
+## 🛠️ Installation & Setup
 
-# 1️⃣ Clone the Repository
-git clone https://github.com/Raghav242/trip-planner.git
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/NEU-CS5610-2025-ONL-SPRING/final-project-part-3-planvoyage.git
 cd trip-planner
+```
 
-# 2️⃣ Backend Setup (api/)
+### 2️⃣ Backend Setup (api/)
+```bash
 cd api
+```
+```bash
 npm install
-cp .env.example .env   # Update environment variables
-npx prisma migrate dev  # Apply Prisma migrations
-npm run dev             # Start the backend server
+```
+#### Update environment variables
+```bash
+cp .env.example .env
+```
 
-# 3️⃣ Frontend Setup (client/)
+#### Apply Prisma migrations
+```bash
+npx prisma migrate dev
+```
+#### Start the backend server
+```bash
+nodemon index.js
+```         
+
+### 3️⃣ Frontend Setup (client/)
+```bash
 cd client
+```
+
+```bash
 npm install
-npm run dev             # Start React frontend
+```
 
-# 🚀 Deployment
+#### Start React frontend
+```bash
+npm run dev
+```        
+---
 
-# Frontend Deployment (Vercel)
-vercel deploy
+### How to Run Test Cases
 
-# Backend Deployment (Render)
-# 1. Push your code to GitHub.
-# 2. Connect Render with your GitHub repository.
-# 3. Add environment variables in Render Dashboard.
-# 4. Deploy the backend.
+## 🧪 Testing (Vitest)
+
+This project uses Vitest and React Testing Library for unit and component testing.
+
+### 📦 Install Test Dependencies
+
+If not already installed, run:
+
+```bash
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom jsdom
+```
+
+### ⚙️ 2. Configure Vitest
+```bash
+// vitest.config.js
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/tests/setup.js', // Optional: for jest-dom matchers
+  },
+});
+```
+
+#### Create a setup file for jest-dom matchers:
+
+```bash
+// src/tests/setup.js
+import '@testing-library/jest-dom';
+
+```
+
+### 🧾 3. Add Test Scripts to package.json
+
+```bash
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "test": "vitest",
+  "test:watch": "vitest --watch"
+}
+```
+
+### ▶️ 4. Run Tests
+
+``` bash
+npx vitest
+```
+
+---
+
+### 🧭 How to Use the App
+1. Use the homepage to search for a city and explore nearby places.
+
+2. Log in to create or select a trip plan.
+
+3. Add places to your plan from the search results.
+
+4. View and edit your saved plans in the "Saved Plans" page.
+
+5. Explore others' suggested plans in the "Suggested Itineries" section.
+
+6. Create and submit your own suggestions for others to see.
+
+
+---
+
+### 🚀 Deployment Links
+1. 🌐 Frontend (Vercel): https://planvoyage-phi.vercel.app/
+
+2. 🔧 Backend (Render): https://planvoyage.onrender.com
+
+3. 🗃️ Database (PostgreSQL on Render): Managed via Render + Prisma
+
+
 

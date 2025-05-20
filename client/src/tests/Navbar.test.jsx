@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
-// 👤 Mock the AuthContext
+//Mock the AuthContext
 vi.mock("../context/AuthContext", () => ({
   useAuthUser: vi.fn(),
 }));
@@ -11,7 +11,7 @@ vi.mock("../context/AuthContext", () => ({
 import { useAuthUser } from "../context/AuthContext";
 
 describe("Navbar Component", () => {
-  it("shows Login/Register when no user is logged in", () => {
+  it("renders navbar with public links when no user is logged in", () => {
     useAuthUser.mockReturnValue({ user: null });
 
     render(
@@ -20,18 +20,18 @@ describe("Navbar Component", () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText("PlanVoyage")).toBeInTheDocument();
+    expect(screen.getByAltText("PlanVoyage")).toBeInTheDocument();
     expect(screen.getByText("Home")).toBeInTheDocument();
-    expect(screen.getByText("Plan Your Trips")).toBeInTheDocument();
-    expect(screen.getByText("Saved Plans")).toBeInTheDocument();
-    expect(screen.getByText("Trip Suggestions")).toBeInTheDocument();
-    expect(screen.getByText("Login/Register")).toBeInTheDocument();
+    expect(screen.getByText("Plan Your Trip")).toBeInTheDocument();
+    expect(screen.getByText("Suggested Iteninaries")).toBeInTheDocument();
+    expect(screen.getByText("Login")).toBeInTheDocument();
   });
 
-  it("shows the username and logout button when user is logged in", () => {
+  it("renders user links and dropdown when logged in", () => {
+    const mockLogout = vi.fn();
     useAuthUser.mockReturnValue({
       user: { id: 1, username: "raghav" },
-      logout: vi.fn(),
+      logout: mockLogout,
     });
 
     render(
@@ -41,5 +41,8 @@ describe("Navbar Component", () => {
     );
 
     expect(screen.getByText("raghav")).toBeInTheDocument();
+    expect(screen.getByText("View Saved Plans")).toBeInTheDocument();
+    expect(screen.getAllByText("My Suggestions").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Logout").length).toBeGreaterThan(0);
   });
 });

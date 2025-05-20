@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function EditSuggestion() {
-  const { suggestionId } = useParams(); // Get the suggestionId from the URL
+  const { suggestionId } = useParams(); 
   const [formData, setFormData] = useState({
     destination: '',
     places: '',
@@ -70,7 +70,8 @@ export default function EditSuggestion() {
       if (res.ok) {
         const updatedSuggestion = await res.json();
         alert('Suggestion updated successfully');
-        navigate(`/trip-suggestions/${updatedSuggestion.id}`); // Redirect to the updated suggestion page
+        navigate(`/trip-suggestions/${updatedSuggestion.id}`); // Redirect to the 
+        // updated suggestion page
       } else {
         const errorData = await res.json();
         alert(errorData.message || 'Failed to update suggestion.');

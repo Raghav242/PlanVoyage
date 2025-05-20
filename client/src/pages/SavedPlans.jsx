@@ -85,7 +85,34 @@ export default function SavedPlans() {
         <div className="row row-cols-1 row-cols-md-4 g-4 text-center">
           {plans.map((plan) => (
             <div className="col" key={plan.id}>
-              <div className="card shadow-sm h-100">
+              <div
+                className="card h-100 border-0 shadow-sm position-relative"
+                style={{
+                  backgroundColor: "#f1f3f5",
+                  borderRadius: "12px",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.05)";
+                }}
+              >
+                <img
+                  src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${plan.name}`}
+                  className="card-img-top"
+                  alt={plan.name}
+                  style={{
+                    height: "140px",
+                    objectFit: "cover",
+                    borderTopLeftRadius: "12px",
+                    borderTopRightRadius: "12px",
+                  }}
+                />
+
                 <div className="card-body d-flex flex-column justify-content-between">
                   <div>
                     {editingPlanId === plan.id ? (
@@ -101,9 +128,9 @@ export default function SavedPlans() {
                       />
                     ) : (
                       <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
-                        <h4 className="card-title mb-0">{plan.name}</h4>
+                        <h5 className="fw-bold mb-0 text-truncate">{plan.name}</h5>
                         <button
-                          className="btn btn-sm btn-link p-0 text-primary"
+                          className="btn btn-sm p-0 border-0 text-primary"
                           onClick={() => handleEditClick(plan)}
                           title="Edit name"
                         >
@@ -113,15 +140,18 @@ export default function SavedPlans() {
                     )}
 
                     {plan.description && (
-                      <p className="text-muted">{plan.description}</p>
+                      <p className="text-muted small mb-2">{plan.description}</p>
                     )}
                     <p className="small text-muted">
                       {plan.places?.length || 0} place
                       {plan.places?.length !== 1 ? "s" : ""}
                     </p>
                   </div>
-                  <button className="btn btn-primary mt-3" onClick={() => handleView(plan)}>
-                    View
+                  <button
+                    className="btn btn-outline-primary w-100 mt-3"
+                    onClick={() => handleView(plan)}
+                  >
+                    View Plan
                   </button>
                 </div>
               </div>

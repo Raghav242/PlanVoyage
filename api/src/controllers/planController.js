@@ -1,12 +1,15 @@
 import prisma from "../config/db.js";
 
-
 // Get all plans for a specific user
 export const getPlansByUser = async (req, res) => {
-  const { userId } = req.params;
+  const userId = parseInt(req.params.userId);
+  if (!Number.isInteger(userId)) {
+    return res.status(400).json({ message: "Invalid user ID." });
+  }
+
   try {
     const plans = await prisma.trip.findMany({
-      where: { userId: parseInt(userId) },
+      where: { userId },
       include: { places: true },
       orderBy: { createdAt: "desc" },
     });
@@ -17,16 +20,46 @@ export const getPlansByUser = async (req, res) => {
   }
 };
 
+//get a single plan
+export const getSinglePlan = async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ message: "Invalid plan ID." });
+  }
+
+  try {
+    const plan = await prisma.trip.findUnique({
+      where: { id },
+      include: { places: true },
+    });
+
+    if (!plan) {
+      return res.status(404).json({ message: "Plan not found." });
+    }
+
+    res.json(plan);
+  } catch (err) {
+    console.error("Error fetching plan:", err);
+    res.status(500).json({ message: "Failed to fetch plan." });
+  }
+};
+
+
 // Create a new plan
 export const createPlan = async (req, res) => {
   const { name, description } = req.body;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!name || typeof name !== "string") {
+    return res.status(400).json({ message: "Plan name is required." });
+  }
 
   try {
     const newPlan = await prisma.trip.create({
       data: {
         name,
-        description,
+        description: description || "",
         user: { connect: { id: userId } },
       },
     });
@@ -39,7 +72,7 @@ export const createPlan = async (req, res) => {
 
 // Add a place to an existing plan
 export const addPlaceToPlan = async (req, res) => {
-  const { planId } = req.params;
+  const planId = parseInt(req.params.planId);
   const {
     placeId,
     name,
@@ -49,20 +82,42 @@ export const addPlaceToPlan = async (req, res) => {
     category,
     notes,
     order,
+    hours,
+    city,
+    state,
+    country,
+    website,
+    phone,
+    imageUrl,
   } = req.body;
+
+  if (!Number.isInteger(planId)) {
+    return res.status(400).json({ message: "Invalid plan ID." });
+  }
+
+  if (!placeId || !name || latitude == null || longitude == null) {
+    return res.status(400).json({ message: "Required place fields missing." });
+  }
 
   try {
     const newPlace = await prisma.tripPlace.create({
       data: {
-        tripId: parseInt(planId),
+        tripId: planId,
         placeId,
         name,
-        address,
-        latitude,
-        longitude,
-        category,
-        notes,
-        order,
+        address: address || "",
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+        category: category || "Other",
+        notes: notes || "",
+        order: order ? parseInt(order) : 0,
+        hours: hours || "",
+        city: city || "",
+        state: state || "",
+        country: country || "",
+        website: website || "",
+        phone: phone || "",
+        imageUrl: imageUrl || ""
       },
     });
     res.status(201).json(newPlace);
@@ -74,13 +129,21 @@ export const addPlaceToPlan = async (req, res) => {
 
 // Update a plan (e.g., rename or update description)
 export const updatePlan = async (req, res) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id);
   const { name, description } = req.body;
+
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ message: "Invalid plan ID." });
+  }
+
+  if (!name || typeof name !== "string") {
+    return res.status(400).json({ message: "Plan name is required." });
+  }
 
   try {
     const updatedPlan = await prisma.trip.update({
-      where: { id: parseInt(id) },
-      data: { name, description },
+      where: { id },
+      data: { name, description: description || "" },
     });
     res.json(updatedPlan);
   } catch (err) {
@@ -91,17 +154,15 @@ export const updatePlan = async (req, res) => {
 
 // Delete a plan
 export const deletePlan = async (req, res) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ message: "Invalid plan ID." });
+  }
 
   try {
-    // Delete associated places first due to foreign key constraint
-    await prisma.tripPlace.deleteMany({
-      where: { tripId: parseInt(id) },
-    });
-
-    await prisma.trip.delete({
-      where: { id: parseInt(id) },
-    });
+    await prisma.tripPlace.deleteMany({ where: { tripId: id } });
+    await prisma.trip.delete({ where: { id } });
 
     res.json({ message: "Plan deleted successfully." });
   } catch (err) {
