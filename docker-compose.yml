@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Raghav@02
+      POSTGRES_DB: planvoyage
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./api
+    environment:
+      DATABASE_URL: postgres://postgres:Raghav%4002@db:5432/planvoyage
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./api:/app      # 🔁 Mount local backend code
+      - /app/node_modules  # ✅ Avoid overwriting container's node_modules
+      - /app/prisma        # keeps prisma schema available  
+    depends_on:
+      - db
+
+  frontend:
+    build: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app    # 🔁 Mount local frontend code
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db:
