@@ -20,6 +20,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://planvoyage-phi.vercel.app', 
+  'http://54.145.128.136:5173',
 ];
 
 // CORS setup
