@@ -8,14 +8,14 @@ The **PlanVoyage App** is a full-stack web application that allows users to sear
 
 ### ✅ Public Features (No Login Required)
 - 🌍 **Search Locations** – Users can search for a city (e.g., Boston) and get nearby places based on distance.
-- 📍 **View Places** – Fetches results from the **Geoapify**.
-- 🔎 **Explore Suggested Itinery** – View trip plans created by other users.
+- 📍 **View Places** – Fetches results from the **Geoapify** API.
+- 🔎 **Explore Suggested Itinerary** – View trip plans created by other users.
 
 ### 🔐 User Features (Login Required)
 - ➕ **Save Trip Plans** – Add places to a personalized list.
 - ✏️ **Edit/Delete Plans** – Modify or remove saved trips.
 - 📝 **Submit Custom Plans** – Create and share trip plans manually.
-- 🔑 **User Authentication** – Register, log in, and manage sessions using JWT authentication.
+- 🔑 **User Authentication** – Register, log in, and manage sessions using JWT and cookies.
 
 ---
 
@@ -24,18 +24,22 @@ The **PlanVoyage App** is a full-stack web application that allows users to sear
 ### **Frontend (React)**
 - **Framework:** React.js (Vite)
 - **State Management:** Context API
-- **UI Library:** Bootstrap CSS
+- **UI Library:** Bootstrap
 - **API Calls:** Axios
 - **Routing:** React Router
-- **Testing:** Vitest
+- **Testing:** Vitest + React Testing Library
 
 ### **Backend (Node.js + Express)**
 - **Framework:** Express.js
-- **Database ORM:** Prisma
-- **Authentication:** JSON Web Token (JWT) + HTTP-only Cookies
+- **ORM:** Prisma
+- **Authentication:** JWT + HTTP-only Cookies
 - **Database:** PostgreSQL
-- **External API Integration:** Geoapify
-- **Deployment:** Vercel (Frontend), Render (Backend), Render (Database)
+- **External API:** Geoapify
+
+### **Deployment**
+- **Frontend:** Vercel & AWS EC2 (Docker)
+- **Backend:** Render & AWS EC2 (Docker)
+- **CI/CD:** GitHub Actions with Docker on EC2
 
 ---
 
@@ -45,100 +49,74 @@ The **PlanVoyage App** is a full-stack web application that allows users to sear
 trip-planner/
 │── client/               # Frontend (React)
 │── api/                  # Backend (Node.js + Express + Prisma)
-    │── prisma/           # Database schema & migrations
-│── .gitignore            # Ignore files for Git
+│   └── prisma/           # Prisma schema & migrations
+│── docker-compose.yml    # Docker orchestration
 │── README.md             # Documentation
-│── package.json          # Project dependencies
-│── .env                  # Environment variables
+
+🐳 Docker Setup & AWS EC2 Deployment
+🛠️ Prerequisites
+Docker & Docker Compose installed on EC2
+
+Node.js and Git installed
+
+Ports 22 (SSH), 80 (HTTP), 5000 (Backend), 5173 (Frontend) open in EC2 security group
+
+🚀 Deployment Steps on EC2
+
+# SSH into your EC2
+ssh -i "your-key.pem" ubuntu@your-ec2-ip
+
+# Clone the repository
+git clone https://github.com/Raghav242/PlanVoyage.git
+cd PlanVoyage
+
+# Populate environment variables in api/.env and client/.env
+# Example:
+nano api/.env
+nano client/.env
+
+# Build and start Docker containers
+sudo docker-compose up --build -d
+
+# If schema was not applied, run:
+sudo docker-compose exec backend npx prisma migrate deploy
 
 
-FrontEnd (client/)
-client/
-│── public/               # Static assets
-│── src/
-│   ├── components/       # Reusable UI components (Navbar, Footer, SearchBar, PlaceCard)
-│   ├── pages/            # React Pages (Home, SearchResults, TripPlanner, SavedPlans, SuggestedPlans, Login)
-│   ├── context/          # Global state management (AuthContext, PlanContext)
-│   ├── App.jsx           # Main React component
-│   ├── main.jsx          # Renders the app
-│── tests/                # Unit tests
-│── package.json          # Project dependencies
-
-Backend (api/)
-api/
-│── src/
-│   ├── controllers/      # Business logic (authController, placeController, planController, suggestionController)
-│   ├── routes/          # API Endpoints (authRoutes, placeRoutes, planRoutes, suggestionRoutes)
-│   ├── middleware/      # Middleware (authMiddleware, errorHandler)
-│   ├── config/          # Prisma database connection (db.js)
-│   ├── index.js         # Main Express.js server file
-│── tests/               # Unit tests
-│── package.json         # Dependencies
-│── .env                 # Environment variables
-```
----
-
-## 🛠️ Installation & Setup
-
-### 1️⃣ Clone the Repository
-
-```bash
-git clone https://github.com/NEU-CS5610-2025-ONL-SPRING/final-project-part-3-planvoyage.git
-cd trip-planner
-```
-
-### 2️⃣ Backend Setup (api/)
-```bash
+📦 Local Development
+🔁 Backend Setup (api/)
 cd api
-```
-```bash
 npm install
-```
-#### Update environment variables
-```bash
 cp .env.example .env
-```
-
-#### Apply Prisma migrations
-```bash
 npx prisma migrate dev
-```
-#### Start the backend server
-```bash
-nodemon index.js
-```         
-
-### 3️⃣ Frontend Setup (client/)
-```bash
-cd client
-```
-
-```bash
-npm install
-```
-
-#### Start React frontend
-```bash
 npm run dev
-```        
----
 
-### How to Run Test Cases
 
-## 🧪 Testing (Vitest)
+🔁 Frontend Setup (client/)
+cd client
+npm install
+cp .env.example .env
+npm run dev
 
-This project uses Vitest and React Testing Library for unit and component testing.
+⚙️ CI/CD with GitHub Actions
+This project includes a GitHub Actions workflow to:
 
-### 📦 Install Test Dependencies
+Automatically build Docker containers
 
-If not already installed, run:
+SSH into EC2 instance
 
-```bash
+Pull latest code
+
+Rebuild and restart containers
+
+Ensure your SSH key is added as a GitHub secret, and proper .env files are already on the EC2 instance.
+
+Workflow file: .github/workflows/deploy.yml
+
+🧪 Testing (Vitest)
+Install test dependencies
 npm install --save-dev vitest @testing-library/react @testing-library/jest-dom jsdom
-```
 
-### ⚙️ 2. Configure Vitest
-```bash
+Configure Vitest
 // vitest.config.js
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
@@ -148,61 +126,38 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/tests/setup.js', // Optional: for jest-dom matchers
+    setupFiles: './src/tests/setup.js',
   },
 });
-```
 
-#### Create a setup file for jest-dom matchers:
-
-```bash
 // src/tests/setup.js
 import '@testing-library/jest-dom';
 
-```
-
-### 🧾 3. Add Test Scripts to package.json
-
-```bash
+Add test script
 "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview",
   "test": "vitest",
   "test:watch": "vitest --watch"
 }
-```
 
-### ▶️ 4. Run Tests
+Run tests
 
-``` bash
-npx vitest
-```
+npm run test
 
----
+🌐 Live Links
+🖥️ Frontend (Vercel): https://planvoyage-phi.vercel.app/
 
-### 🧭 How to Use the App
-1. Use the homepage to search for a city and explore nearby places.
+🔧 Backend (Render): https://planvoyage.onrender.com
 
-2. Log in to create or select a trip plan.
-
-3. Add places to your plan from the search results.
-
-4. View and edit your saved plans in the "Saved Plans" page.
-
-5. Explore others' suggested plans in the "Suggested Itineries" section.
-
-6. Create and submit your own suggestions for others to see.
+🌍 EC2 Hosted Site: http://44.210.115.94:5173
 
 
----
+🧭 Usage Guide
+Search a city on the homepage to get nearby places.
 
-### 🚀 Deployment Links
-1. 🌐 Frontend (Vercel): https://planvoyage-phi.vercel.app/
+Log in to create/select a trip plan.
 
-2. 🔧 Backend (Render): https://planvoyage.onrender.com
+Add places to your plan.
 
-3. 🗃️ Database (PostgreSQL on Render): Managed via Render + Prisma
+View and manage saved trips.
 
-
-
+Browse or submit trip suggestions from/to other users.
