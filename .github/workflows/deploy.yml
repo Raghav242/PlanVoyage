@@ -2,40 +2,58 @@ name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main  
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
+      - name: Set up Docker CLI
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker images
+      - name: Install Docker Compose CLI
         run: |
-          docker-compose -f docker-compose.yml build
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
-      - name: Copy files to EC2 via SSH
-        uses: appleboy/scp-action@v0.1.7
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "."
           target: "~/PlanVoyage"
 
-      - name: SSH into EC2 and restart Docker containers
-        uses: appleboy/ssh-action@v0.1.10
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Install Docker if not installed
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+            fi
+
+            # Install Docker Compose if not installed
+            if ! command -v docker-compose &> /dev/null; then
+              echo "Installing Docker Compose..."
+              sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
             cd ~/PlanVoyage
             docker-compose down
-            docker-compose up --build -d
+            docker-compose build
+            docker-compose up -d
