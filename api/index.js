@@ -15,30 +15,34 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Allowed frontend origins (for CORS)
+// ✅ Allowed frontend origins
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  'https://planvoyage-phi.vercel.app', 
+  'https://planvoyage-phi.vercel.app',
   'http://54.145.128.136:5173',
 ];
 
-// CORS setup
-app.use(cors({
+// ✅ CORS options with logging
+const corsOptions = {
   origin: function (origin, callback) {
+    console.log('🔍 CORS origin:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     console.warn(`❌ Blocked by CORS: ${origin}`);
     return callback(new Error('CORS policy does not allow this origin.'));
   },
-  credentials: true, 
-}));
+  credentials: true,
+};
 
+// ✅ Middleware
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight requests
 app.use(express.json());
 app.use(cookieParser());
 
-// API routes
+// ✅ API routes
 app.use(pingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', suggestionRoutes);
@@ -46,7 +50,7 @@ app.use('/api/places', placeRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/trip-places', tripPlaceRoutes);
 
-// Server start
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
